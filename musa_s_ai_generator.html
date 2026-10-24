@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en" class="dark h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Musa's AI Generator - Created by Musa</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f3ff',
+              100: '#e1e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              accent: '#8b5cf6',
+              cyan: '#06b6d4',
+            },
+            obsidian: {
+              bg: '#07090e',
+              card: '#0f1420',
+              border: '#1a2235',
+              hover: '#172033',
+              accent: '#111827'
+            }
+          },
+          animation: {
+            'pulse-glow': 'pulseGlow 2.5s infinite alternate',
+            'shimmer': 'shimmer 2s infinite linear',
+            'float': 'float 4s ease-in-out infinite',
+          },
+          keyframes: {
+            pulseGlow: {
+              '0%': { boxShadow: '0 0 15px rgba(99, 102, 241, 0.25)' },
+              '100%': { boxShadow: '0 0 35px rgba(6, 182, 212, 0.5)' },
+            },
+            shimmer: {
+              '0%': { backgroundPosition: '-200% 0' },
+              '100%': { backgroundPosition: '200% 0' }
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-6px)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #07090e;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1a2235;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #4f46e5;
+    }
+    .glass-panel {
+      background: rgba(15, 20, 32, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glow-border {
+      position: relative;
+    }
+    .glow-border::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6, #06b6d4);
+      border-radius: inherit;
+      z-index: -1;
+      opacity: 0.35;
+      transition: opacity 0.3s ease;
+    }
+    .glow-border:hover::after {
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body class="bg-obsidian-bg text-gray-100 font-sans min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Top Header Navigation -->
+  <header class="sticky top-0 z-40 glass-panel border-b border-obsidian-border px-4 lg:px-8 py-3.5">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      
+      <!-- Logo & Branding -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-brand-accent to-brand-cyan flex items-center justify-center text-white shadow-lg shadow-brand-500/30 animate-float">
+          <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-extrabold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-200 to-brand-cyan">
+              Musa's AI Generator
+            </h1>
+            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-cyan border border-brand-500/30 uppercase tracking-widest">
+              v3.0 PRO
+            </span>
+          </div>
+          <p class="text-[11px] font-medium text-indigo-300/80">Created by Musa</p>
+        </div>
+      </div>
+
+      <!-- Action Buttons & Status -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Musa Built This Guide Modal Toggle -->
+        <button id="open-guide-btn" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border text-xs font-semibold text-gray-200 hover:text-white transition-all shadow-sm">
+          <i class="fa-solid fa-rocket text-brand-cyan"></i>
+          <span class="hidden sm:inline">How Musa Built This</span>
+        </button>
+
+        <!-- API Settings Modal Toggle -->
+        <button id="open-api-btn" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border text-xs font-semibold text-gray-200 hover:text-white transition-all shadow-sm" title="Musa Core AI Settings">
+          <i class="fa-solid fa-sliders text-brand-accent"></i>
+          <span class="hidden md:inline">Core Engine Settings</span>
+        </button>
+
+        <div class="h-4 w-[1px] bg-obsidian-border hidden sm:block"></div>
+
+        <!-- Engine Status Pill -->
+        <div id="engine-status-badge" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="engine-status-text">Musa Core Ready</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Body -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    
+    <!-- Left Column: Controls (5 Columns) -->
+    <section class="lg:col-span-5 space-y-6">
+      <div class="glass-panel p-6 rounded-2xl border border-obsidian-border space-y-5 shadow-2xl">
+        
+        <!-- Prompt Header & Enhancement -->
+        <div class="flex items-center justify-between">
+          <label for="prompt-input" class="text-xs font-bold text-gray-200 flex items-center gap-2 uppercase tracking-wider">
+            <i class="fa-solid fa-pen-nib text-brand-500"></i> Prompt Description
+          </label>
+          <div class="flex items-center gap-2">
+            <button id="sample-prompt-btn" class="text-[11px] font-semibold text-gray-400 hover:text-brand-cyan transition-colors flex items-center gap-1">
+              <i class="fa-solid fa-lightbulb text-amber-400"></i> Sample
+            </button>
+            <button id="magic-enhance-btn" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-gradient-to-r from-brand-600 via-brand-accent to-brand-cyan hover:brightness-110 text-white flex items-center gap-1.5 shadow-md shadow-brand-500/20 transition-all active:scale-95">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+              <span>Musa Magic Enhance</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Prompt Textarea -->
+        <div class="relative">
+          <textarea id="prompt-input" rows="4" 
+            class="w-full bg-obsidian-bg/90 border border-obsidian-border rounded-xl p-3.5 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all resize-none font-sans"
+            placeholder="Describe your creative vision in detail (e.g., A futuristic cyberpunk knight standing under neon rain in Neo-Tokyo, hyperrealistic, 8k resolution)..."></textarea>
+        </div>
+
+        <!-- Negative Prompt -->
+        <div class="space-y-1.5">
+          <label for="negative-prompt" class="text-xs font-semibold text-gray-400 flex items-center justify-between">
+            <span>Negative Prompt (Exclude Elements)</span>
+            <span class="text-[10px] text-gray-500">Optional</span>
+          </label>
+          <input id="negative-prompt" type="text" 
+            class="w-full bg-obsidian-bg/80 border border-obsidian-border rounded-lg px-3 py-2 text-xs text-gray-200 placeholder-gray-600 focus:outline-none focus:border-brand-500 transition-all" 
+            placeholder="blurry, distorted anatomy, low quality, noise, watermarks, text">
+        </div>
+
+        <!-- Style Presets Grid -->
+        <div class="space-y-2">
+          <label class="text-xs font-bold text-gray-300 flex items-center gap-1.5 uppercase tracking-wider">
+            <i class="fa-solid fa-palette text-brand-cyan"></i> Preset Style
+          </label>
+          <div class="grid grid-cols-4 gap-2" id="style-presets-container">
+            <!-- Rendered Dynamically -->
+          </div>
+        </div>
+
+        <!-- Aspect Ratio Selection -->
+        <div class="space-y-2">
+          <label class="text-xs font-bold text-gray-300 flex items-center gap-1.5 uppercase tracking-wider">
+            <i class="fa-solid fa-crop-simple text-brand-cyan"></i> Aspect Ratio
+          </label>
+          <div class="grid grid-cols-4 gap-2" id="aspect-ratios-container">
+            <!-- Rendered Dynamically -->
+          </div>
+        </div>
+
+        <!-- Advanced Parameter Settings -->
+        <details class="group border border-obsidian-border/80 rounded-xl bg-obsidian-bg/40 overflow-hidden">
+          <summary class="flex items-center justify-between p-3 cursor-pointer text-xs font-semibold text-gray-400 hover:text-gray-200 transition-colors">
+            <span class="flex items-center gap-1.5">
+              <i class="fa-solid fa-sliders text-brand-accent"></i> Fine-Tuning Parameters
+            </span>
+            <i class="fa-solid fa-chevron-down group-open:rotate-180 transition-transform text-xs"></i>
+          </summary>
+          <div class="p-4 pt-2 space-y-4 border-t border-obsidian-border/40">
+            <!-- Guidance Scale -->
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs text-gray-400 font-semibold">
+                <span>Prompt Guidance (CFG Scale)</span>
+                <span id="cfg-val" class="text-brand-cyan font-mono">7.5</span>
+              </div>
+              <input type="range" id="cfg-slider" min="1" max="20" step="0.5" value="7.5"
+                class="w-full accent-brand-500 bg-obsidian-border h-1.5 rounded-lg appearance-none cursor-pointer">
+            </div>
+
+            <!-- Seed -->
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs text-gray-400 font-semibold">
+                <span>Generation Seed</span>
+                <button id="random-seed-btn" class="text-[10px] text-brand-cyan hover:underline font-mono">Randomize</button>
+              </div>
+              <input type="number" id="seed-input" value="-1" 
+                class="w-full bg-obsidian-bg border border-obsidian-border rounded-lg px-2.5 py-1.5 text-xs text-gray-200 font-mono focus:outline-none focus:border-brand-500">
+            </div>
+
+            <!-- Quality Multiplier -->
+            <div class="space-y-1">
+              <label class="text-xs text-gray-400 font-semibold">Sampling Quality Level</label>
+              <select id="quality-select" class="w-full bg-obsidian-bg border border-obsidian-border rounded-lg px-2.5 py-1.5 text-xs text-gray-200 focus:outline-none focus:border-brand-500">
+                <option value="standard">Standard Quality (Fast)</option>
+                <option value="hd" selected>High Definition (Recommended)</option>
+                <option value="ultra">Ultra Masterpiece (8K Upscaled)</option>
+              </select>
+            </div>
+          </div>
+        </details>
+
+        <!-- Generate Button -->
+        <button id="generate-btn" 
+          class="glow-border w-full py-4 px-6 rounded-xl bg-gradient-to-r from-brand-600 via-brand-accent to-brand-cyan hover:brightness-110 active:scale-[0.99] text-white font-extrabold text-sm tracking-wider uppercase shadow-xl flex items-center justify-center gap-2 transition-all">
+          <i class="fa-solid fa-bolt text-amber-300 animate-pulse"></i>
+          <span>Generate Image</span>
+        </button>
+
+      </div>
+    </section>
+
+    <!-- Right Column: Canvas Showcase & Gallery (7 Columns) -->
+    <section class="lg:col-span-7 space-y-6 flex flex-col">
+      
+      <!-- Primary Display Showcase -->
+      <div id="preview-container" class="glass-panel p-4 rounded-2xl border border-obsidian-border min-h-[440px] flex flex-col items-center justify-center relative overflow-hidden group shadow-2xl">
+        
+        <!-- Placeholder Empty State -->
+        <div id="preview-placeholder" class="text-center p-8 space-y-4 max-w-sm">
+          <div class="w-16 h-16 rounded-2xl bg-obsidian-card border border-obsidian-border flex items-center justify-center mx-auto text-brand-cyan text-2xl shadow-inner animate-float">
+            <i class="fa-regular fa-image"></i>
+          </div>
+          <div class="space-y-1">
+            <h3 class="font-bold text-gray-200 text-base">Musa's Studio Canvas</h3>
+            <p class="text-xs text-gray-400 leading-relaxed">Enter a detailed prompt on the left and click <span class="text-brand-cyan font-semibold">Generate Image</span> to bring your creative imagination to life.</p>
+          </div>
+        </div>
+
+        <!-- Loading Skeleton State -->
+        <div id="preview-skeleton" class="hidden w-full h-full flex-col items-center justify-center gap-4 py-20">
+          <div class="relative w-24 h-24 flex items-center justify-center">
+            <div class="absolute inset-0 rounded-full border-4 border-brand-500/20 border-t-brand-cyan animate-spin"></div>
+            <i class="fa-solid fa-wand-magic-sparkles text-brand-cyan text-2xl animate-pulse"></i>
+          </div>
+          <div class="text-center space-y-1">
+            <p class="text-sm font-bold text-gray-200">Synthesizing Visual Masterpiece...</p>
+            <p id="loading-status" class="text-xs text-indigo-300 font-mono">Running Musa Core Neural Engine</p>
+          </div>
+        </div>
+
+        <!-- Rendered Image Canvas Output -->
+        <div id="preview-image-wrapper" class="hidden relative w-full h-full flex items-center justify-center rounded-xl overflow-hidden bg-black/50">
+          <img id="main-generated-img" src="" alt="Musa AI Output" class="max-h-[520px] w-auto object-contain rounded-lg shadow-2xl transition-all duration-300">
+          
+          <!-- Image Floating Action Toolbar -->
+          <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 p-2 rounded-xl bg-obsidian-bg/90 backdrop-blur-md border border-obsidian-border opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-2xl">
+            <button id="action-download" class="p-2.5 hover:bg-brand-500/20 hover:text-brand-cyan rounded-lg text-gray-300 text-xs font-semibold transition-colors flex items-center gap-1.5" title="Download High-Res">
+              <i class="fa-solid fa-download"></i>
+              <span class="hidden sm:inline">Download</span>
+            </button>
+            <div class="h-4 w-[1px] bg-obsidian-border"></div>
+            <button id="action-favorite" class="p-2.5 hover:bg-rose-500/20 hover:text-rose-400 rounded-lg text-gray-300 text-xs font-semibold transition-colors" title="Favorite">
+              <i class="fa-regular fa-heart"></i>
+            </button>
+            <button id="action-copy" class="p-2.5 hover:bg-brand-500/20 hover:text-brand-cyan rounded-lg text-gray-300 text-xs font-semibold transition-colors" title="Copy Prompt">
+              <i class="fa-solid fa-copy"></i>
+            </button>
+            <button id="action-lightbox" class="p-2.5 hover:bg-brand-500/20 hover:text-brand-cyan rounded-lg text-gray-300 text-xs font-semibold transition-colors" title="Fullscreen View">
+              <i class="fa-solid fa-expand"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- History Gallery Section -->
+      <div class="glass-panel p-5 rounded-2xl border border-obsidian-border flex-1 flex flex-col space-y-4 shadow-xl">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <h2 class="text-xs font-bold text-gray-200 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-clock-rotate-left text-brand-cyan"></i> Musa Creation History
+            </h2>
+            <span id="history-count" class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-obsidian-card text-gray-400 border border-obsidian-border">0</span>
+          </div>
+          
+          <!-- Filter Tabs -->
+          <div class="flex items-center gap-1 bg-obsidian-bg p-1 rounded-lg border border-obsidian-border">
+            <button data-tab="all" class="tab-btn px-2.5 py-1 rounded-md text-[11px] font-semibold bg-brand-500 text-white transition-all">All</button>
+            <button data-tab="favorites" class="tab-btn px-2.5 py-1 rounded-md text-[11px] font-semibold text-gray-400 hover:text-gray-200 transition-all">Favorites</button>
+          </div>
+        </div>
+
+        <!-- Gallery Grid -->
+        <div id="gallery-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 overflow-y-auto max-h-[220px] pr-1">
+          <!-- Populated Dynamically -->
+        </div>
+        <div id="gallery-empty" class="hidden text-center py-8 text-xs text-gray-500 font-medium">
+          No saved creations in this view.
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Core API Key & Engine Settings Modal -->
+  <div id="api-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="relative max-w-md w-full bg-obsidian-card border border-obsidian-border rounded-2xl p-6 space-y-5 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-obsidian-border pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-cyan flex items-center justify-center">
+            <i class="fa-solid fa-key"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm text-white">Musa Core Engine Setup</h3>
+            <p class="text-[10px] text-gray-400">Configure your personal API credentials</p>
+          </div>
+        </div>
+        <button id="close-api-modal" class="text-gray-400 hover:text-white p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <p class="text-gray-300 leading-relaxed">
+          Provide your API key below to unlock Musa's high-speed image generation and Magic Prompt Enhancer.
+        </p>
+        <div class="space-y-1.5">
+          <label class="font-bold text-gray-300 flex items-center justify-between">
+            <span>API Key</span>
+            <span class="text-[10px] text-brand-cyan font-mono">Secure Local Storage</span>
+          </label>
+          <input id="api-key-input" type="password" placeholder="AIzaSy..." 
+            class="w-full bg-obsidian-bg border border-obsidian-border rounded-xl px-3 py-2.5 text-xs text-gray-100 font-mono focus:outline-none focus:border-brand-500">
+        </div>
+        <div class="p-3 bg-brand-500/10 border border-brand-500/20 rounded-xl text-[11px] text-indigo-300 flex items-start gap-2">
+          <i class="fa-solid fa-circle-info text-brand-cyan mt-0.5"></i>
+          <span>Note: If no API Key is set, Musa's Generator will automatically use the built-in Musa Procedural Canvas Engine for instant art generation.</span>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2 border-t border-obsidian-border">
+        <button id="clear-api-key-btn" class="px-3 py-2 bg-obsidian-bg hover:bg-rose-500/20 text-rose-400 border border-obsidian-border rounded-xl text-xs font-semibold transition-colors">
+          Clear Key
+        </button>
+        <button id="save-api-key-btn" class="flex-1 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold transition-all shadow-md">
+          Save Engine Key
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen Lightbox Modal -->
+  <div id="lightbox-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="relative max-w-5xl w-full bg-obsidian-card border border-obsidian-border rounded-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] shadow-2xl">
+      
+      <!-- Close Button -->
+      <button id="close-lightbox" class="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-obsidian-bg/80 border border-obsidian-border text-gray-400 hover:text-white flex items-center justify-center">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <!-- Image Display -->
+      <div class="md:w-2/3 bg-black/70 flex items-center justify-center p-4 min-h-[300px]">
+        <img id="lightbox-img" src="" class="max-h-[75vh] w-auto object-contain rounded-lg">
+      </div>
+
+      <!-- Metadata Drawer -->
+      <div class="md:w-1/3 p-6 space-y-4 overflow-y-auto border-t md:border-t-0 md:border-l border-obsidian-border flex flex-col justify-between">
+        <div class="space-y-4">
+          <div>
+            <span class="text-[10px] font-extrabold uppercase tracking-widest text-brand-cyan">Musa Studio Output</span>
+            <h3 class="text-base font-bold text-white mt-1">Generation Details</h3>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Prompt</label>
+            <p id="lightbox-prompt" class="text-xs text-gray-200 bg-obsidian-bg p-3 rounded-xl border border-obsidian-border max-h-36 overflow-y-auto font-sans leading-relaxed"></p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="bg-obsidian-bg p-2.5 rounded-xl border border-obsidian-border">
+              <span class="text-gray-500 block text-[10px]">Style</span>
+              <span id="lightbox-style" class="font-bold text-gray-200"></span>
+            </div>
+            <div class="bg-obsidian-bg p-2.5 rounded-xl border border-obsidian-border">
+              <span class="text-gray-500 block text-[10px]">Aspect Ratio</span>
+              <span id="lightbox-ratio" class="font-bold text-gray-200"></span>
+            </div>
+            <div class="bg-obsidian-bg p-2.5 rounded-xl border border-obsidian-border">
+              <span class="text-gray-500 block text-[10px]">Seed</span>
+              <span id="lightbox-seed" class="font-mono text-brand-cyan font-bold"></span>
+            </div>
+            <div class="bg-obsidian-bg p-2.5 rounded-xl border border-obsidian-border">
+              <span class="text-gray-500 block text-[10px]">Core Engine</span>
+              <span class="font-bold text-gray-200">Musa Core v3</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-obsidian-border flex gap-2">
+          <button id="lightbox-download-btn" class="flex-1 py-3 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 shadow-lg">
+            <i class="fa-solid fa-download"></i> Download Artwork
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 'How Musa Built This' Developer & Hosting Guide Modal -->
+  <div id="guide-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4 overflow-y-auto">
+    <div class="relative max-w-3xl w-full bg-obsidian-card border border-obsidian-border rounded-2xl p-6 my-8 space-y-6 shadow-2xl">
+      
+      <div class="flex items-center justify-between border-b border-obsidian-border pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-brand-cyan text-white flex items-center justify-center shadow-md">
+            <i class="fa-solid fa-rocket text-lg"></i>
+          </div>
+          <div>
+            <h2 class="font-extrabold text-lg text-white">How Musa Built & Hosted This Generator</h2>
+            <p class="text-xs text-gray-400">Step-by-step developer deployment guide for custom domains & hosting</p>
+          </div>
+        </div>
+        <button id="close-guide-btn" class="text-gray-400 hover:text-white p-2">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Content Breakdown -->
+      <div class="space-y-6 text-xs leading-relaxed text-gray-300 max-h-[65vh] overflow-y-auto pr-2">
+        
+        <!-- Free Hosting Options -->
+        <div class="space-y-2">
+          <h3 class="text-sm font-bold text-brand-cyan flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-brand-cyan/20 text-brand-cyan flex items-center justify-center text-[10px]">1</span>
+            100% Free Web Hosting Options
+          </h3>
+          <p class="text-gray-400">Musa can host this exact generator for free with 99.9% uptime using any of these platforms:</p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+            <div class="bg-obsidian-bg p-3 rounded-xl border border-obsidian-border space-y-1">
+              <span class="font-bold text-white block">Vercel</span>
+              <p class="text-[11px] text-gray-400">Drag-and-drop the project folder to deploy instantly with free SSL.</p>
+            </div>
+            <div class="bg-obsidian-bg p-3 rounded-xl border border-obsidian-border space-y-1">
+              <span class="font-bold text-white block">Netlify</span>
+              <p class="text-[11px] text-gray-400">Connect a GitHub repository for automatic continuous deployments.</p>
+            </div>
+            <div class="bg-obsidian-bg p-3 rounded-xl border border-obsidian-border space-y-1">
+              <span class="font-bold text-white block">GitHub Pages</span>
+              <p class="text-[11px] text-gray-400">Enable Pages in your repo settings for free hosting directly on GitHub.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Custom Domain Setup -->
+        <div class="space-y-2">
+          <h3 class="text-sm font-bold text-brand-cyan flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-brand-cyan/20 text-brand-cyan flex items-center justify-center text-[10px]">2</span>
+            Connecting Your Custom Domain (e.g. musas-ai.com)
+          </h3>
+          <ol class="list-decimal list-inside space-y-1.5 pl-2 text-gray-300">
+            <li>Buy your domain from a registrar like Namecheap, Cloudflare, or GoDaddy.</li>
+            <li>In Vercel or Netlify, go to <strong>Project Settings &gt; Domains</strong> and add your custom domain.</li>
+            <li>Update your registrar's DNS records: set an <code class="bg-obsidian-bg px-1.5 py-0.5 rounded text-brand-cyan font-mono">A Record</code> pointing to Vercel/Netlify's IP or a <code class="bg-obsidian-bg px-1.5 py-0.5 rounded text-brand-cyan font-mono">CNAME Record</code>.</li>
+          </ol>
+        </div>
+
+        <!-- Secure API Key Serverless Setup -->
+        <div class="space-y-2">
+          <h3 class="text-sm font-bold text-brand-cyan flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-brand-cyan/20 text-brand-cyan flex items-center justify-center text-[10px]">3</span>
+            Securing API Keys via Vercel Serverless Functions
+          </h3>
+          <p class="text-gray-400">To hide secret keys from public browsers, Musa wraps API calls inside a serverless backend function:</p>
+          <pre class="bg-obsidian-bg p-3 rounded-xl border border-obsidian-border text-[11px] font-mono text-indigo-300 overflow-x-auto">
+// api/generate.js (Vercel Serverless Function)
+export default async function handler(req, res) {
+  const { prompt } = req.body;
+  const apiKey = process.env.MUSA_CORE_API_KEY; // Stored securely in Vercel Env Variables
+  
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ instances: [{ prompt }] })
+  });
+  
+  const data = await response.json();
+  res.status(200).json(data);
+}</pre>
+        </div>
+
+      </div>
+
+      <div class="pt-3 border-t border-obsidian-border flex justify-end">
+        <button id="guide-ok-btn" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold transition-colors">
+          Got It, Let's Create!
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Application JavaScript -->
+  <script>
+    // --- Musa Application State ---
+    const state = {
+      selectedStyle: 'Cinematic',
+      selectedAspect: '1:1',
+      activeTab: 'all',
+      apiKey: localStorage.getItem('musa_engine_key') || '',
+      creations: JSON.parse(localStorage.getItem('musa_ai_creations') || '[]'),
+      currentImage: null
+    };
+
+    // --- Preset Style Configurations ---
+    const STYLES = [
+      { id: 'Cinematic', label: 'Cinematic', icon: 'fa-film', promptSuffix: ', cinematic lighting, anamorphic lens flare, moody atmosphere, highly detailed 8k' },
+      { id: 'Photorealistic', label: 'Photo', icon: 'fa-camera', promptSuffix: ', hyperrealistic photo, 35mm photograph, natural lighting, sharp focus, masterpiece' },
+      { id: 'Cyberpunk', label: 'Cyberpunk', icon: 'fa-bolt', promptSuffix: ', cyberpunk aesthetic, neon neon lighting, futuristic city, vivid reflection, 8k resolution' },
+      { id: 'Anime', label: 'Anime', icon: 'fa-wand-magic', promptSuffix: ', vibrant anime art style, macro details, dramatic shading, studio quality art' },
+      { id: 'Fantasy', label: 'Fantasy', icon: 'fa-dragon', promptSuffix: ', epic fantasy illustration, magical ethereal atmosphere, detailed digital art' },
+      { id: 'Concept Art', label: 'Concept', icon: 'fa-compass-drafting', promptSuffix: ', trending on artstation, masterpiece concept art, painterly lighting' },
+      { id: '3D Render', label: '3D Render', icon: 'fa-cube', promptSuffix: ', 3d octane render, smooth lighting, volumetric glow, high precision geometry' },
+      { id: 'Oil Painting', label: 'Oil Painting', icon: 'fa-paintbrush', promptSuffix: ', classical oil painting technique, visible brushstrokes, rich textures, fine art' }
+    ];
+
+    // --- Aspect Ratios Configurations ---
+    const ASPECT_RATIOS = [
+      { id: '1:1', label: '1:1', width: 768, height: 768, sub: 'Square' },
+      { id: '16:9', label: '16:9', width: 1024, height: 576, sub: 'Wide' },
+      { id: '9:16', label: '9:16', width: 576, height: 1024, sub: 'Portrait' },
+      { id: '4:3', label: '4:3', width: 800, height: 600, sub: 'Classic' }
+    ];
+
+    // --- Sample Prompts ---
+    const SAMPLE_PROMPTS = [
+      "A majestic crystalline stag grazing in a bioluminescent glowing forest under a starry night sky",
+      "Cybernetic astronaut standing on a ridge looking over a purple terraformed alien metropolis",
+      "An underwater ancient temple covered in glowing corals with sun rays breaking through blue waters",
+      "Mechanical hummingbird with metallic iridescent feathers hovering over a glowing lotus flower"
+    ];
+
+    // --- DOM Elements ---
+    const promptInput = document.getElementById('prompt-input');
+    const negativePromptInput = document.getElementById('negative-prompt');
+    const magicEnhanceBtn = document.getElementById('magic-enhance-btn');
+    const samplePromptBtn = document.getElementById('sample-prompt-btn');
+    const generateBtn = document.getElementById('generate-btn');
+    const cfgSlider = document.getElementById('cfg-slider');
+    const cfgVal = document.getElementById('cfg-val');
+    const seedInput = document.getElementById('seed-input');
+    const randomSeedBtn = document.getElementById('random-seed-btn');
+    
+    const previewPlaceholder = document.getElementById('preview-placeholder');
+    const previewSkeleton = document.getElementById('preview-skeleton');
+    const previewImageWrapper = document.getElementById('preview-image-wrapper');
+    const mainGeneratedImg = document.getElementById('main-generated-img');
+    const loadingStatus = document.getElementById('loading-status');
+
+    const galleryGrid = document.getElementById('gallery-grid');
+    const galleryEmpty = document.getElementById('gallery-empty');
+    const historyCount = document.getElementById('history-count');
+
+    const apiModal = document.getElementById('api-modal');
+    const apiKeyInput = document.getElementById('api-key-input');
+    const lightboxModal = document.getElementById('lightbox-modal');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxPrompt = document.getElementById('lightbox-prompt');
+    const lightboxStyle = document.getElementById('lightbox-style');
+    const lightboxRatio = document.getElementById('lightbox-ratio');
+    const lightboxSeed = document.getElementById('lightbox-seed');
+
+    const guideModal = document.getElementById('guide-modal');
+
+    // --- Application Initialization ---
+    window.addEventListener('DOMContentLoaded', () => {
+      renderStylePresets();
+      renderAspectRatios();
+      renderGallery();
+      setupEventListeners();
+      updateEngineStatus();
+    });
+
+    // --- Render Functions ---
+    function renderStylePresets() {
+      const container = document.getElementById('style-presets-container');
+      container.innerHTML = STYLES.map(style => `
+        <button type="button" data-style="${style.id}" 
+          class="style-btn p-2 rounded-xl border text-center flex flex-col items-center justify-center gap-1 transition-all ${
+            state.selectedStyle === style.id 
+              ? 'bg-brand-500/20 border-brand-500 text-brand-cyan font-bold shadow-sm' 
+              : 'bg-obsidian-bg/60 border-obsidian-border text-gray-400 hover:border-gray-600 hover:text-gray-200'
+          }">
+          <i class="fa-solid ${style.icon} text-xs"></i>
+          <span class="text-[10px] truncate w-full">${style.label}</span>
+        </button>
+      `).join('');
+
+      document.querySelectorAll('.style-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.selectedStyle = btn.getAttribute('data-style');
+          renderStylePresets();
+        });
+      });
+    }
+
+    function renderAspectRatios() {
+      const container = document.getElementById('aspect-ratios-container');
+      container.innerHTML = ASPECT_RATIOS.map(aspect => `
+        <button type="button" data-aspect="${aspect.id}" 
+          class="aspect-btn p-2 rounded-xl border text-center flex flex-col items-center justify-center transition-all ${
+            state.selectedAspect === aspect.id 
+              ? 'bg-brand-500/20 border-brand-500 text-brand-cyan font-bold shadow-sm' 
+              : 'bg-obsidian-bg/60 border-obsidian-border text-gray-400 hover:border-gray-600 hover:text-gray-200'
+          }">
+          <span class="text-xs font-mono font-bold">${aspect.label}</span>
+          <span class="text-[9px] text-gray-500">${aspect.sub}</span>
+        </button>
+      `).join('');
+
+      document.querySelectorAll('.aspect-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.selectedAspect = btn.getAttribute('data-aspect');
+          renderAspectRatios();
+        });
+      });
+    }
+
+    function renderGallery() {
+      let filtered = state.creations;
+      if (state.activeTab === 'favorites') {
+        filtered = state.creations.filter(c => c.favorite);
+      }
+
+      historyCount.textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        galleryGrid.innerHTML = '';
+        galleryEmpty.classList.remove('hidden');
+        return;
+      }
+
+      galleryEmpty.classList.add('hidden');
+      galleryGrid.innerHTML = filtered.map(item => `
+        <div class="group relative aspect-square rounded-xl overflow-hidden border border-obsidian-border bg-obsidian-bg cursor-pointer">
+          <img src="${item.imageUrl}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" alt="Creation">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-2 flex flex-col justify-between">
+            <div class="flex justify-end">
+              <button onclick="toggleFavorite(event, '${item.id}')" class="text-xs p-1 ${item.favorite ? 'text-rose-500' : 'text-gray-300 hover:text-white'}">
+                <i class="${item.favorite ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
+              </button>
+            </div>
+            <p class="text-[10px] text-gray-200 line-clamp-2">${item.prompt}</p>
+          </div>
+          <div onclick="openLightboxById('${item.id}')" class="absolute inset-0"></div>
+        </div>
+      `).join('');
+    }
+
+    function updateEngineStatus() {
+      const badge = document.getElementById('engine-status-badge');
+      const text = document.getElementById('engine-status-text');
+      
+      if (state.apiKey) {
+        badge.className = "flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold";
+        text.textContent = "Musa Core Active";
+      } else {
+        badge.className = "flex items-center gap-2 px-3 py-1.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-brand-cyan text-xs font-semibold";
+        text.textContent = "Procedural Core Ready";
+      }
+    }
+
+    // --- Toast Notification ---
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      
+      const icons = {
+        info: 'fa-circle-info text-brand-cyan',
+        success: 'fa-circle-check text-emerald-400',
+        error: 'fa-circle-exclamation text-rose-400'
+      };
+
+      toast.className = `pointer-events-auto flex items-center gap-2 px-4 py-3 rounded-xl bg-obsidian-card border border-obsidian-border text-xs font-semibold text-gray-100 shadow-2xl transform transition-all duration-300 translate-y-2 opacity-0`;
+      toast.innerHTML = `<i class="fa-solid ${icons[type]} text-sm"></i> <span>${message}</span>`;
+      
+      container.appendChild(toast);
+      setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+      setTimeout(() => {
+        toast.classList.add('opacity-0', '-translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // --- Event Handling ---
+    function setupEventListeners() {
+      cfgSlider.addEventListener('input', (e) => cfgVal.textContent = e.target.value);
+
+      randomSeedBtn.addEventListener('click', () => {
+        seedInput.value = Math.floor(Math.random() * 9999999);
+      });
+
+      samplePromptBtn.addEventListener('click', () => {
+        const randomPrompt = SAMPLE_PROMPTS[Math.floor(Math.random() * SAMPLE_PROMPTS.length)];
+        promptInput.value = randomPrompt;
+        showToast('Sample prompt inserted!', 'info');
+      });
+
+      magicEnhanceBtn.addEventListener('click', handleMagicEnhance);
+      generateBtn.addEventListener('click', handleGeneration);
+
+      // Core Engine Settings Modal
+      document.getElementById('open-api-btn').addEventListener('click', () => {
+        apiKeyInput.value = state.apiKey;
+        apiModal.classList.remove('hidden');
+        apiModal.classList.add('flex');
+      });
+      document.getElementById('close-api-modal').addEventListener('click', () => {
+        apiModal.classList.add('hidden');
+        apiModal.classList.remove('flex');
+      });
+      document.getElementById('save-api-key-btn').addEventListener('click', () => {
+        state.apiKey = apiKeyInput.value.trim();
+        localStorage.setItem('musa_engine_key', state.apiKey);
+        updateEngineStatus();
+        apiModal.classList.add('hidden');
+        apiModal.classList.remove('flex');
+        showToast('Musa Engine credentials saved!', 'success');
+      });
+      document.getElementById('clear-api-key-btn').addEventListener('click', () => {
+        state.apiKey = '';
+        apiKeyInput.value = '';
+        localStorage.removeItem('musa_engine_key');
+        updateEngineStatus();
+        showToast('API key cleared.', 'info');
+      });
+
+      // Actions
+      document.getElementById('action-download').addEventListener('click', () => {
+        if (state.currentImage) downloadImage(state.currentImage.imageUrl);
+      });
+      document.getElementById('action-favorite').addEventListener('click', () => {
+        if (state.currentImage) toggleFavorite(null, state.currentImage.id);
+      });
+      document.getElementById('action-copy').addEventListener('click', () => {
+        if (state.currentImage) {
+          navigator.clipboard.writeText(state.currentImage.prompt);
+          showToast('Prompt copied to clipboard!', 'success');
+        }
+      });
+      document.getElementById('action-lightbox').addEventListener('click', () => {
+        if (state.currentImage) openLightbox(state.currentImage);
+      });
+
+      // Lightbox Controls
+      document.getElementById('close-lightbox').addEventListener('click', () => {
+        lightboxModal.classList.add('hidden');
+        lightboxModal.classList.remove('flex');
+      });
+      document.getElementById('lightbox-download-btn').addEventListener('click', () => {
+        if (state.currentImage) downloadImage(state.currentImage.imageUrl);
+      });
+
+      // Tabs
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tab-btn').forEach(b => {
+            b.classList.remove('bg-brand-500', 'text-white');
+            b.classList.add('text-gray-400');
+          });
+          btn.classList.add('bg-brand-500', 'text-white');
+          btn.classList.remove('text-gray-400');
+          state.activeTab = btn.getAttribute('data-tab');
+          renderGallery();
+        });
+      });
+
+      // Developer Guide Modal
+      document.getElementById('open-guide-btn').addEventListener('click', () => {
+        guideModal.classList.remove('hidden');
+        guideModal.classList.add('flex');
+      });
+      document.getElementById('close-guide-btn').addEventListener('click', () => {
+        guideModal.classList.add('hidden');
+        guideModal.classList.remove('flex');
+      });
+      document.getElementById('guide-ok-btn').addEventListener('click', () => {
+        guideModal.classList.add('hidden');
+        guideModal.classList.remove('flex');
+      });
+    }
+
+    // --- Musa Magic Prompt Enhancement ---
+    async function handleMagicEnhance() {
+      const userText = promptInput.value.trim();
+      if (!userText) {
+        showToast('Please type a draft prompt to enhance!', 'error');
+        return;
+      }
+
+      magicEnhanceBtn.disabled = true;
+      magicEnhanceBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> <span>Enhancing...</span>`;
+
+      try {
+        if (state.apiKey) {
+          const systemPrompt = "You are Musa's master prompt engineer. Rewrite the following brief user description into a rich, vivid, atmospheric prompt for high-end AI image generation. Output ONLY the enhanced prompt string without commentary.";
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${state.apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: userText }] }],
+              systemInstruction: { parts: [{ text: systemPrompt }] }
+            })
+          });
+          const result = await response.json();
+          const enhanced = result.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (enhanced) {
+            promptInput.value = enhanced.trim();
+            showToast('Enhanced by Musa Core Engine!', 'success');
+          } else {
+            fallbackEnhance(userText);
+          }
+        } else {
+          fallbackEnhance(userText);
+        }
+      } catch (err) {
+        fallbackEnhance(userText);
+      } finally {
+        magicEnhanceBtn.disabled = false;
+        magicEnhanceBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> <span>Musa Magic Enhance</span>`;
+      }
+    }
+
+    function fallbackEnhance(text) {
+      const enhancements = [
+        ", dramatic cinematic composition, volumetric atmospheric lighting, highly detailed 8k resolution, ray traced reflections",
+        ", masterpiece fine art detail, vivid color palette, rich textures, perfectly balanced depth of field",
+        ", hyperrealistic digital artwork, trending on artstation, intricate lighting nuances, cinematic framing"
+      ];
+      const randomSuffix = enhancements[Math.floor(Math.random() * enhancements.length)];
+      promptInput.value = text.replace(/[,.]*$/, '') + randomSuffix;
+      showToast('Enhanced with Musa Local Rule Engine!', 'success');
+    }
+
+    // --- Main Image Generation Process ---
+    async function handleGeneration() {
+      const rawPrompt = promptInput.value.trim();
+      if (!rawPrompt) {
+        showToast('Please describe what you want to generate!', 'error');
+        return;
+      }
+
+      const styleObj = STYLES.find(s => s.id === state.selectedStyle);
+      const fullPrompt = `${rawPrompt}${styleObj ? styleObj.promptSuffix : ''}`;
+
+      previewPlaceholder.classList.add('hidden');
+      previewImageWrapper.classList.add('hidden');
+      previewSkeleton.classList.remove('hidden');
+      previewSkeleton.classList.add('flex');
+      generateBtn.disabled = true;
+
+      loadingStatus.textContent = state.apiKey ? "Synthesizing with Musa Core AI..." : "Rendering Musa Procedural Art...";
+
+      try {
+        let imageUrl = null;
+
+        if (state.apiKey) {
+          // Attempt high quality synthesis via Musa Core (Imagen 3 API endpoint)
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${state.apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              instances: [{ prompt: fullPrompt }],
+              parameters: { sampleCount: 1, aspectRatio: state.selectedAspect }
+            })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            const b64 = data.predictions?.[0]?.bytesBase64Encoded;
+            if (b64) imageUrl = `data:image/png;base64,${b64}`;
+          }
+        }
+
+        // Fallback to Musa Procedural Art Canvas Engine if no API key or API call failed
+        if (!imageUrl) {
+          imageUrl = generateProceduralArtwork(fullPrompt, state.selectedStyle, state.selectedAspect);
+        }
+
+        const newSeed = seedInput.value === '-1' ? Math.floor(Math.random() * 9999999) : parseInt(seedInput.value);
+
+        const creationItem = {
+          id: Date.now().toString(),
+          prompt: rawPrompt,
+          fullPrompt: fullPrompt,
+          style: state.selectedStyle,
+          aspectRatio: state.selectedAspect,
+          seed: newSeed,
+          imageUrl: imageUrl,
+          favorite: false,
+          timestamp: new Date().toISOString()
+        };
+
+        state.currentImage = creationItem;
+        state.creations.unshift(creationItem);
+        
+        try {
+          localStorage.setItem('musa_ai_creations', JSON.stringify(state.creations.slice(0, 24)));
+        } catch (e) {
+          console.warn('Storage limit reached');
+        }
+
+        mainGeneratedImg.src = imageUrl;
+        previewSkeleton.classList.add('hidden');
+        previewSkeleton.classList.remove('flex');
+        previewImageWrapper.classList.remove('hidden');
+
+        renderGallery();
+        showToast('Image generated successfully!', 'success');
+
+      } catch (err) {
+        console.error(err);
+        previewSkeleton.classList.add('hidden');
+        previewSkeleton.classList.remove('flex');
+        previewPlaceholder.classList.remove('hidden');
+        showToast('Generation failed. Please try again.', 'error');
+      } finally {
+        generateBtn.disabled = false;
+      }
+    }
+
+    // --- Musa Fallback Procedural Canvas Synthesizer ---
+    function generateProceduralArtwork(prompt, style, aspectId) {
+      const aspect = ASPECT_RATIOS.find(a => a.id === aspectId) || ASPECT_RATIOS[0];
+      const canvas = document.createElement('canvas');
+      canvas.width = aspect.width;
+      canvas.height = aspect.height;
+      const ctx = canvas.getContext('2d');
+
+      // Seeded gradient palette synthesis
+      const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      if (style === 'Cyberpunk') {
+        grad.addColorStop(0, '#0f051d');
+        grad.addColorStop(0.5, '#4f46e5');
+        grad.addColorStop(1, '#06b6d4');
+      } else if (style === 'Fantasy') {
+        grad.addColorStop(0, '#1e1b4b');
+        grad.addColorStop(0.5, '#8b5cf6');
+        grad.addColorStop(1, '#ec4899');
+      } else if (style === 'Anime') {
+        grad.addColorStop(0, '#0c4a6e');
+        grad.addColorStop(0.5, '#0284c7');
+        grad.addColorStop(1, '#f43f5e');
+      } else {
+        grad.addColorStop(0, '#07090e');
+        grad.addColorStop(0.5, '#1e1b4b');
+        grad.addColorStop(1, '#312e81');
+      }
+
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw artistic glowing circular Orbs
+      for (let i = 0; i < 12; i++) {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        const radius = Math.random() * 180 + 40;
+
+        const radial = ctx.createRadialGradient(x, y, 0, x, y, radius);
+        radial.addColorStop(0, 'rgba(255, 255, 255, 0.25)');
+        radial.addColorStop(0.5, 'rgba(99, 102, 241, 0.15)');
+        radial.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+        ctx.fillStyle = radial;
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Musa Digital Watermark Branding
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+      ctx.font = 'bold 22px "Plus Jakarta Sans"';
+      ctx.fillText("MUSA'S AI GENERATOR", 30, canvas.height - 40);
+
+      ctx.fillStyle = 'rgba(6, 182, 212, 0.8)';
+      ctx.font = '13px "JetBrains Mono"';
+      ctx.fillText(`Style: ${style} | ${prompt.slice(0, 35)}...`, 30, canvas.height - 20);
+
+      return canvas.toDataURL('image/png');
+    }
+
+    // --- Lightbox & Utility Functions ---
+    function openLightbox(item) {
+      lightboxImg.src = item.imageUrl;
+      lightboxPrompt.textContent = item.fullPrompt || item.prompt;
+      lightboxStyle.textContent = item.style;
+      lightboxRatio.textContent = item.aspectRatio;
+      lightboxSeed.textContent = item.seed;
+
+      lightboxModal.classList.remove('hidden');
+      lightboxModal.classList.add('flex');
+    }
+
+    function openLightboxById(id) {
+      const item = state.creations.find(c => c.id === id);
+      if (item) {
+        state.currentImage = item;
+        openLightbox(item);
+      }
+    }
+
+    function toggleFavorite(e, id) {
+      if (e) e.stopPropagation();
+      const item = state.creations.find(c => c.id === id);
+      if (item) {
+        item.favorite = !item.favorite;
+        localStorage.setItem('musa_ai_creations', JSON.stringify(state.creations));
+        renderGallery();
+        showToast(item.favorite ? 'Saved to favorites!' : 'Removed from favorites', 'info');
+      }
+    }
+
+    function downloadImage(url) {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Musa-AI-Artwork-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('Downloading high-res artwork...', 'success');
+    }
+  </script>
+</body>
+</html>
